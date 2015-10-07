@@ -354,7 +354,9 @@ def main():
         sys.stderr.write(USAGE)
         sys.exit(1)
     except Error, e:
-        sys.stderr.write("error: %s\n" % str(e))
+        sys.stderr.write("----------")
+        sys.stderr.write("\nerror: %s\n" % str(e))
+        sys.stderr.write("----------")
         sys.exit(1)
 
 if __name__ == "__main__":
