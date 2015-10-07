@@ -240,21 +240,24 @@ class SVNLook:
         return output.strip()
 
 
-def check_perms(filename, section, repos, txn=None, rev=None, author=None):
+def check_perms(filenames, section, repos, txn=None, rev=None, author=None):
     svnlook = SVNLook(repos, txn=txn, rev=rev)
     if author is None:
         author = svnlook.author()
     changes = svnlook.changed()
-    try:
-        config = Config(filename)
-    except IOError:
-        raise Error("can't read config file "+filename)
-    if not section in config.sections():
-        raise Error("section '%s' not found in config file" % section)
     perm = Permission()
-    perm.parse_groups(config.walk("groups"))
-    perm.parse_groups(config.walk(section+" groups"))
-    perm.parse_perms(config.walk(section))
+    
+    for filename in filenames:
+        try:
+            config = Config(filename)
+        except IOError:
+            raise Error("can't read config file "+filename)
+        if (not section in config.sections()) and (not "groups" in config.sections()):
+            raise Error("section '%s' and section 'groups' not found in config file" % section)
+        perm.parse_groups(config.walk("groups"))
+        perm.parse_groups(config.walk(section+" groups"))
+        perm.parse_perms(config.walk(section))
+    
     permerrors = []
     for changedata, changeprop, path in changes:
         pathperms = perm.get(author, path)
@@ -303,7 +306,7 @@ def parse_options():
         raise Error(e.msg)
     class Options: pass
     obj = Options()
-    obj.filename = None
+    obj.filenames = []
     obj.section = None
     obj.repository = None
     obj.transaction = None
@@ -311,7 +314,7 @@ def parse_options():
     obj.author = None
     for opt, val in opts:
         if opt == "-f":
-            obj.filename = val
+            obj.filenames.append(val)
         elif opt == "-s":
             obj.section = val
         elif opt == "-r":
@@ -333,8 +336,8 @@ def parse_options():
     if missingopts:
         raise MissingArgumentsException("missing required option(s): " + ", ".join(missingopts))
     obj.repository = os.path.abspath(obj.repository)
-    if obj.filename is None:
-        obj.filename = os.path.join(obj.repository, "conf", "svnperms.conf")
+    if not obj.filenames:
+        obj.filenames.insert( 0, os.path.join(obj.repository, "conf", "svnperms.conf") )
     if obj.section is None:
         obj.section = os.path.basename(obj.repository)
     if not (os.path.isdir(obj.repository) and
@@ -349,7 +352,7 @@ def parse_options():
 def main():
     try:
         opts = parse_options()
-        check_perms(opts.filename, opts.section,
+        check_perms(opts.filenames, opts.section,
                     opts.repository, opts.transaction, opts.revision,
                     opts.author)
     except MissingArgumentsException, e:
