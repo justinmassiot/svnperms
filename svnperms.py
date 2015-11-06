@@ -47,7 +47,7 @@ __author__ = "Gustavo Niemeyer <gustavo@niemeyer.net>"
 class Error(Exception): pass
 
 SECTION = re.compile(r'\[([^]]+?)(?:\s+extends\s+([^]]+))?\]')
-OPTION = re.compile(r'(\S+)\s*=\s*(.*)$')
+OPTION = re.compile(r'([^=]+)=\s*(.*)$') # a group with a name containing one or more spaces is now allowed
 
 class Config:
     def __init__(self, filename):
@@ -97,6 +97,7 @@ class Config:
                     m = OPTION.match(line)
                     if m:
                         optname, optval = m.groups()
+                        optname = optname.strip()
                         optval = optval.strip()
                         cursectdict[optname] = optval
                         cursectlist.append([optname, optval])
