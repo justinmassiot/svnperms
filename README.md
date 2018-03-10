@@ -2,7 +2,7 @@
 This is a fork from a SVN hook script provided by the Apache Software Foundation ( http://svn.apache.org/repos/asf/subversion/trunk/tools/hook-scripts/ at revision 1707324 ).
 
 "svnperms" is a script written in Python to enforce advanced permissions check. Comparatively to the usual "path-based permission file (authz)" it offers the possibility to check paths against regular expressions.
-This script is very useful integrated in a pre-commit-hook for example, but can't do anything to restrict read access.
+This script is very useful when it's integrated in a pre-commit-hook for example, but can't do anything to restrict read access.
 
 All the configuration is done in a dedicated file, by default './conf/svnperms.conf' (relative to the repository root) but can be edited with the '-f' modifier. In the configuration there must be a section named like the repository name, or a section named like the one passed with the '-s' modifier.
 
